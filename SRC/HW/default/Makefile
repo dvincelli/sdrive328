@@ -4,8 +4,8 @@
 
 ## General Flags
 PROJECT = SDrive
-MCU = atmega8
-#MCU = atmega328
+#MCU = atmega8
+MCU = atmega328
 TARGET = SDrive.elf
 CC = avr-gcc
 

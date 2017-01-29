@@ -75,3 +75,22 @@
 #define PI		3.14159265359
 
 #endif
+
+#ifdef __AVR_ATmega328__
+//defines needed for Atmega328:
+#define    URSEL    UMSEL01
+#define    UCSRA    UCSR0A
+#define    UCSRB    UCSR0B
+#define    UCSRC    UCSR0C
+#define    UBRRH    UBRR0H
+#define    UBRRL    UBRR0L
+#define    UDRE    UDRE0
+#define    UDR    UDR0
+#define    RXC    RXC0
+#define    RXEN    RXEN0
+#define    TXEN    TXEN0
+#define    UCSZ1    UCSZ01
+#define    UCSZ0    UCSZ00 
+
+#endif
+
