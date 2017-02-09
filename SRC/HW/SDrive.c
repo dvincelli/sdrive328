@@ -16,6 +16,23 @@
 #include "fat.h"
 #include "sboot.h"
 
+
+#ifdef __AVR_ATmega328P__
+#define	   URSEL    0
+#define    UCSRA    UCSR0A
+#define    UCSRB    UCSR0B
+#define    UCSRC    UCSR0C
+#define    UBRRH    UBRR0H
+#define    UBRRL    UBRR0L
+#define    UDRE     UDRE0
+#define    UDR      UDR0
+#define    RXC      RXC0
+#define    RXEN     RXEN0
+#define    TXEN     TXEN0
+#define    UCSZ1    UCSZ01
+#define    UCSZ0    UCSZ00 
+#endif
+
 #define    TWOBYTESTOWORD(ptr)           *((u16*)(ptr))
 #define    FOURBYTESTOLONG(ptr)           *((u32*)(ptr))
 
@@ -560,13 +577,13 @@ int main(void)
 	//Parameters
 	struct SDriveParameters sdrparams;
 
-	{
+	if (0) {
 		//naplni pamet 0x55kama
 		unsigned char *p;
 		for(p=0x60; p<(0x045f-64); p++) *p=0x55;
 	}
 
-	debug_endofvariables=0xaaaaaaaa;	//posledni promenna
+	// debug_endofvariables=0xaaaaaaaa;	//posledni promenna
 
 
 	sbi(DDRC,0); // LED_pin out;

@@ -5,7 +5,7 @@
 ## General Flags
 PROJECT = SDrive
 #MCU = atmega8
-MCU = atmega328
+MCU = atmega328p
 TARGET = SDrive.elf
 CC = avr-gcc
 
@@ -86,6 +86,21 @@ size: ${TARGET}
 clean:
 	-rm -rf $(OBJECTS) SDrive.elf dep/* SDrive.hex SDrive.eep SDrive.lss SDrive.map
 
+## Upload to device
+.PHONY: flash
+flash:
+	avrdude -v -v -v -v -e -p atmega328p -cusbasp -Pusb -Uflash:w:SDrive.hex:i
+
+.PHONY: eeprom
+eeprom:
+	avrdude -v -v -v -v -p atmega328p -cusbasp -Pusb -Ueeprom:w:SDrive.eep:i 
+
+.PHONY: fuse
+fuse:
+	avrdude -v -v -v -v -e -p atmega328p -cusbasp -Pusb -Ulfuse:w:0xff:m -Uhfuse:w:0xde:m -Uefuse:w:0x05:m
+
+.PHONY: upload
+upload: flash fuse eeprom
 
 ## Other dependencies
 -include $(shell mkdir dep 2>/dev/null) $(wildcard dep/*)

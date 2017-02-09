@@ -49,6 +49,12 @@ void spiInit()
     cbi(DDRB, 4);   // set MISO as input
     sbi(DDRB, 3);   // set MOSI as output
     sbi(DDRB, 2);   // SS must be output for Master mode to work
+#elif __AVR_ATmega328P__
+    sbi(PORTB, 5);  // set SCK hi
+    sbi(DDRB, 5);   // set SCK as output
+    cbi(DDRB, 4);   // set MISO as input
+    sbi(DDRB, 3);   // set MOSI as output
+    sbi(DDRB, 2);   // SS must be output for Master mode to work
 #else
 	// setup SPI I/O pins
 	sbi(PORTB, 7);	// set SCK hi
