@@ -1,0 +1,8 @@
+*.o
+SRC/HW/default/SDrive.eep
+SRC/HW/default/SDrive.elf
+SRC/HW/default/SDrive.hex
+SRC/HW/default/SDrive.lss
+SRC/HW/default/SDrive.map
+*.swo
+*.swp
