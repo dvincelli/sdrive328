@@ -52,12 +52,43 @@ extern void Delay1000us();
 //Pokey_frq = 1789790
 //BAUD = Pokey_frq/2/(AUDF+7)		//(16bit register)
 
+/*
+ * I switched the USART_Init method to take a baudrate instead of UBBRL value,
+ * It now calculates UBBRH and UBBRL on the fly. For a 16MHz clock, 55931 baud
+ * was the best fast sio match. 
+ *
+ * XXX E2Xn (double speed mode) might allow us to use a faster baudrate
+*/
 #define US_POKEY_DIV_STANDARD	0x28		//#40  => 19040 bps
+#define ATARI_BAUDRATE_STANDARD 19040
+#define US_POKEY_DIV_DEFAULT	0x09		//#9   => 55931 bps
+#define ATARI_BAUDRATE_FASTIO   55931
+
+/*
+
+NOTE:
+
+For the atari 800,
+
+The exact formula for the nominal speed is baud Rate = clock / (2*(divisor+7))
+
+Where clock is ~1,773,447 for PAL, and ~1,789,772 for NTSC, however, it’s not always possible to reach nominal speeds. So, 1x is divisor 40, 2x is divisor 16 and 3x is divisor 8. Divisor 0 is ~l26 kbps and that means approximately 6x.
+
+*/
+#define F_NTSC 7789772
+#define F_PAL  1773447
+#define F_ATARI F_NTSC
+#define POKEY_DIVISOR_TO_BAUDRATE(divisor) (F_ATARI / (2 * (divisor + 7)))
+
+#define US_POKEY_DIV_MAX	(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
+
+/*
 #define ATARI_SPEED_STANDARD	(US_POKEY_DIV_STANDARD+6)	//#46 (o sest vic)
 
 #define US_POKEY_DIV_DEFAULT	0x06		//#6   => 68838 bps
-
 #define US_POKEY_DIV_MAX		(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
+*/
+
 
 /*
 #define SIOSPEED_MODES	9	//pocet fastsio_mode=0..8
@@ -160,7 +191,7 @@ unsigned char get_checksum(unsigned char* buffer, u16 len)
 }
 
 /*
-//pouziva se jen jednou v USART_Init, takze vlozena primo do teto funkce (uspora 10bytu)
+// Used only once in USART_Init, so embedded directly into this function (saving 10bytes)
 void USART_Flush( void )
 {
 	unsigned char dummy;
@@ -168,25 +199,28 @@ void USART_Flush( void )
 }
 */
 
-void USART_Init( u08 value )
+void USART_Init(uint32_t baudrate)
 {
+	uint16_t ubrr = 0;
+
 	/* Wait for empty transmit buffer */
 	while ( !( UCSRA & (1<<UDRE)) ); //cekani
 
 	/* Set baud rate */
-//	UBRRH = (unsigned char)(baud>>8);
-//	UBRRL = (unsigned char)(baud&0xff);
-	UBRRH = 0;	//HB =0
-	UBRRL = value;
-
-	/* Set double speed flag */
-	//	UCSRA = (1<<UDRE)|(1<<U2X); //double speed
-	UCSRA = (1<<UDRE);
+	ubrr = (F_CPU / (16UL * baudrate)) - 1;
+	
+	UBRRH = ubrr >> 8;
+	UBRRL = ubrr;
 
 	/* Enable Receiver and Transmitter */
 	UCSRB = (1<<RXEN)|(1<<TXEN);
+
 	/* Set frame format: 8data, 1stop bit */
+#ifdef __AVR__ATmega328P__
+	UCSRC = (1<<UCSZ1)|(1<<UCSZ0);
+#else
 	UCSRC = (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);
+#endif
 
 	//void USART_Flush( void )
 	{
@@ -630,12 +664,12 @@ SD_CARD_EJECTED:
 
 	init_display();
 
-	USART_Init(ATARI_SPEED_STANDARD);
+	USART_Init(ATARI_BAUDRATE_STANDARD);
 
 	LED_GREEN_ON;	// LED on
 
 	//CEKACI SMYCKA!!!
-	while (inb(PIND)&0x04); //cekani az zasune nejakou kartu
+ 	while (inb(PIND)&0x04); //cekani az zasune nejakou kartu
 
 	//pozor, v tomto okamziku nesmi byt nacacheovan zadny sektor
 	//pro zapis, protoze init karty inicializuje i mmc_sector atd.!!!
@@ -848,9 +882,9 @@ autowritecounter_reset:
 
 change_sio_speed_by_fastsio_active:
 				{
-				 u08 as;
-				 as=ATARI_SPEED_STANDARD;	//default speed
-				 if (fastsio_active) as=fastsio_pokeydiv+6;		//vzdy o 6 vic
+				 u32 as;
+				 as=ATARI_BAUDRATE_STANDARD;	//default speed
+				 if (fastsio_active) as=POKEY_DIVISOR_TO_BAUDRATE(fastsio_pokeydiv) ;
 
 				 USART_Init(as);
 				}
