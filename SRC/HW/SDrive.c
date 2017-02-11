@@ -15,10 +15,11 @@
 #include "mmc.h"		// include MMC card access functions
 #include "fat.h"
 #include "sboot.h"
+#include "delay_x.h"
 
 
 #ifdef __AVR_ATmega328P__
-#define	   URSEL    0
+#define	   URSEL    0		// needed to placate the compiler
 #define    UCSRA    UCSR0A
 #define    UCSRB    UCSR0B
 #define    UCSRC    UCSR0C
@@ -37,11 +38,13 @@
 #define    FOURBYTESTOLONG(ptr)           *((u32*)(ptr))
 
 
+/*
 extern void Delay100usX(unsigned short delay);        //externi funkce
 extern void Delay100us();
 extern void Delay200us();
 extern void Delay800us();
 extern void Delay1000us();
+*/
 
 //F_CPU = 14318180
 //UBRR = (F_CPU/16/BAUD)-1
@@ -302,14 +305,14 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
 	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
 	//Kdyz bylo jen 300us tak nefungovalo
-	Delay800us();	//t5
+	_delay_us(800);	//t5
 	send_CMPL();
 	//	Delay1000us();	//S timhle to bylo doposud (a nefunguje pod Qmegem3 Ultraspeed vubec)
-	//	Delay100us(); 		//Pokusne kratsi pauza
+	//	_delay_us(100); 		//Pokusne kratsi pauza
 						//(tato fce se pouziva se i u read SpeedIndex 3F,
 						// coz s delsi pauzou nefunguje (pod Qmegem3 fast)
-	//Delay800us();	//t6
-	Delay200us();	//<--pouziva se i u commandu 3F
+	//_delay_us(800);	//t6
+	_delay_us(200);	//<--pouziva se i u commandu 3F
 
 	USART_Send_Buffer(atari_sector_buffer,len);
 	check_sum = get_checksum(atari_sector_buffer,len);
@@ -802,7 +805,7 @@ autowritecounter_reset:
 				}
 				set_display(actual_drive_number);
 				last_key = actual_key;
-				Delay100usX(500); //pauza 50ms = 0.05s (kvuli tlacitkum)
+				_delay_us(100 * 500); //pauza 50ms = 0.05s (kvuli tlacitkum)
 			}
 			if (autowritecounter>1700000)
 			{
@@ -828,9 +831,9 @@ autowritecounter_reset:
 			//pokud je duvodem zmena cmd na H, nemusi cekat na wait_cmd_LH()
 			//if (err&0x01) goto change_sio_speed; //zvedl se cmd na H, ihned jde menit rychlost
 
-			Delay800us();	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
+			_delay_us(800);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
 			wait_cmd_LH();	//ceka az se zvedne signal command na H
-			Delay100us();	//T2=100   (po zvednuti command a pred ACKem)
+			_delay_us(100);	//T2=100   (po zvednuti command a pred ACKem)
 
 			if(err)
 			{
@@ -1063,17 +1066,17 @@ device_command_accepted:
 					atari_sector_buffer[0]=fastsio_pokeydiv;	//primo vraci Pokey divisor
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(1);
 					/*
-					Delay800us();	//t5
+					_delay_us(800);	//t5
 					send_CMPL();
-					//Delay800us();	//t6 <-- tohle tady nefungovalo, na Fast neslo bootnout ani pod Qmegem4
-					Delay200us();
+					//_delay_us(800);	//t6 <-- tohle tady nefungovalo, na Fast neslo bootnout ani pod Qmegem4
+					_delay_us(200);
 					USART_Transmit_Byte(pdiv);	//US_POKEY_DIV);
-					Delay100usX(6);	//special 600us
+					_delay_us(100 * 6);	//special 600us
 					USART_Transmit_Byte(pdiv);	//US_POKEY_DIV);	// check_sum
 					*/
 					/*
 					send_CMPL();
-					Delay200us(); 	//delay_us(200); //delay_us(COMMAND_DELAY); doesn't work in Qmeg 3.2!
+					_delay_us(200); 	//delay_us(200); //delay_us(COMMAND_DELAY); doesn't work in Qmeg 3.2!
 					USART_Transmit_Byte(US_POKEY_DIV);
 					USART_Transmit_Byte(US_POKEY_DIV);	// check_sum
 					*/
@@ -1484,9 +1487,9 @@ set_number_of_sectors_to_buffer_1_2:
 				{
 				 unsigned char* p = 0x060;
 				 //check_sum = get_checksum(p,1024);	//nema smysl - checksum cele pameti by se ukladal zase do pameti a tim by to zneplatnil
-				 Delay800us();	//t5
+				 _delay_us(800);	//t5
 				 send_CMPL();
-				 Delay800us();	//t6
+				 _delay_us(800);	//t6
 
 				 USART_Send_Buffer(p,1024);
 				 //USART_Transmit_Byte(check_sum);
@@ -1567,7 +1570,7 @@ set_number_of_sectors_to_buffer_1_2:
 				goto Send_CMPL_and_Delay;
 				*/
 
-				Delay800us();	//t5
+				_delay_us(800);	//t5
 				send_CMPL();
 				goto change_sio_speed_by_fastsio_active;
 				//USART_Init(ATARI_SPEED_STANDARD); //a zinicializovat standardni
@@ -1636,9 +1639,9 @@ set_number_of_sectors_to_buffer_1_2:
 
 				mmcReadCached(extraSDcommands_readwritesectornumber);
 
-				Delay800us();	//t5
+				_delay_us(800);	//t5
 				send_CMPL();
-				Delay800us();	//t6
+				_delay_us(800);	//t6
 				{
 				 u08 check_sum;
 				 check_sum = get_checksum(mmc_sector_buffer,512);
@@ -1711,7 +1714,7 @@ set_number_of_sectors_to_buffer_1_2:
 				//musi ulozit pripadny nacacheovany sektor
 			 	mmcWriteCachedFlush(); //pokud ceka nejaky sektor na zapis, zapise ho
 
-				Delay800us();	//t5
+				_delay_us(800);	//t5
 				send_CMPL();
 				
 				if ( command[2]==0 ) goto SD_CARD_EJECTED;
@@ -2214,13 +2217,13 @@ Command_EC_F0_FF_found:
 			if (0)
 			{
 Send_CMPL_and_Delay:
-				Delay800us();	//t5
+				_delay_us(800);	//t5
 				send_CMPL();
 			}
 			if (0)
 			{
 Send_ERR_and_Delay:
-				Delay800us();	//t5
+				_delay_us(800);	//t5
 				send_ERR();
 			}
 			//za poslednim cmpl nebo err neni potreba pauza, jde hned cekat na command

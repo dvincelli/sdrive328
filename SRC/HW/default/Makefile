@@ -40,7 +40,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 INCLUDES = -I"/usr/lib/avr/include" -I"/usr/lib/avr/bin" -I"usr/lib/avr/lib"
 
 ## Objects that must be built in order to link
-OBJECTS = SDrive.o spi.o mmc.o fat.o delay100us.o 
+OBJECTS = SDrive.o spi.o mmc.o fat.o # delay100us.o 
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS = 
