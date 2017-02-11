@@ -311,7 +311,7 @@ u08 USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buff, u16 len
 	err = USART_Get_Buffer_And_Check(buff,len,CMD_STATE_H);
 	//vraci 0 kdyz ok, !=0 kdyz chyba
 
-	Delay1000us();	//t4
+	_delay_us(1000);	//t4
 	if(err)
 	{
 		send_NACK();
@@ -341,7 +341,7 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 	//Kdyz bylo jen 300us tak nefungovalo
 	_delay_us(800);	//t5
 	send_CMPL();
-	//	Delay1000us();	//S timhle to bylo doposud (a nefunguje pod Qmegem3 Ultraspeed vubec)
+	//	_delay_us(1000);	//S timhle to bylo doposud (a nefunguje pod Qmegem3 Ultraspeed vubec)
 	//	_delay_us(100); 		//Pokusne kratsi pauza
 						//(tato fce se pouziva se i u read SpeedIndex 3F,
 						// coz s delsi pauzou nefunguje (pod Qmegem3 fast)
@@ -1090,7 +1090,7 @@ Send_NACK_and_ST_IDLE:
 device_command_accepted:
 
 			send_ACK();
-//			Delay1000us();	//delay_us(COMMAND_DELAY);
+//			_delay_us(1000);	//delay_us(COMMAND_DELAY);
 
 			switch(command[1])
 			{
@@ -1492,7 +1492,7 @@ set_number_of_sectors_to_buffer_1_2:
 
 
 			send_ACK();
-//			Delay1000us();	//delay_us(COMMAND_DELAY);
+//			_delay_us(1000);	//delay_us(COMMAND_DELAY);
 
 			if ( last_used_virtual_drive != 0x0f )
 			{
@@ -1539,7 +1539,7 @@ set_number_of_sectors_to_buffer_1_2:
 
 				 //check_sum = get_checksum(atari_sector_buffer,256);
 				 //send_CMPL();
-				 //Delay1000us();	//delay_us(COMMAND_DELAY);
+				 //_delay_us(1000);	//delay_us(COMMAND_DELAY);
 				 //USART_Send_Buffer(atari_sector_buffer,256);
 				 //USART_Transmit_Byte(check_sum);
  				 USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(6);
@@ -1703,7 +1703,7 @@ set_number_of_sectors_to_buffer_1_2:
 				{
 				 u08 err;
 				 err=USART_Get_Buffer_And_Check(mmc_sector_buffer,512,CMD_STATE_H);
-				 Delay1000us();
+				 _delay_us(1000);
 				 if(err)
 				 {
 					//obnovi puvodni stav mc_sector_bufferu z SDkarty!!!
