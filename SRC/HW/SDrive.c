@@ -75,7 +75,7 @@ The exact formula for the nominal speed is baud Rate = clock / (2*(divisor+7))
 Where clock is ~1,773,447 for PAL, and ~1,789,772 for NTSC, however, it’s not always possible to reach nominal speeds. So, 1x is divisor 40, 2x is divisor 16 and 3x is divisor 8. Divisor 0 is ~l26 kbps and that means approximately 6x.
 
 */
-#define F_NTSC 7789772
+#define F_NTSC 1789772
 #define F_PAL  1773447
 #define F_ATARI F_NTSC
 #define POKEY_DIVISOR_TO_BAUDRATE(divisor) (F_ATARI / (2 * (divisor + 7)))
