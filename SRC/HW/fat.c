@@ -38,7 +38,6 @@
 #include "fat.h"
 #include "mmc.h"
 
-void USART_SendString(char *buff);
 u08 mmcReadCached(u32 sector);
 
 
